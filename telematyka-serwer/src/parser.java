@@ -32,4 +32,9 @@ public class parser {
 		db.logowanie(log, pass, "lekarz");
 		
 	}
+	public static String parraport(String line) throws SQLException {
+		db_connector db = new db_connector();
+		String raport = db.getRaports(line);
+		return raport;
+	}
 }

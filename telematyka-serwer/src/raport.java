@@ -2,10 +2,7 @@
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.text.ParseException;
-import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -13,16 +10,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONException;
-
-@WebServlet("/servletdata")
-public class servletdata extends HttpServlet {
+/**
+ * Servlet implementation class raport
+ */
+@WebServlet("/raport")
+public class raport extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-
+       
     /**
-     * Default constructor. 
+     * @see HttpServlet#HttpServlet()
      */
-    public servletdata() {
+    public raport() {
+        super();
         // TODO Auto-generated constructor stub
     }
 
@@ -32,28 +31,34 @@ public class servletdata extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		response.getWriter().append("Served at: ").append(request.getContextPath());
-		System.out.println("zapytanie get");
-		PrintWriter output = response.getWriter();
-		output.println(" [0] NEW TEST:");
-		
 	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {		
-		 StringBuffer jb = new StringBuffer();
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		System.out.println("Przetwarzam zadania");
+		StringBuffer jb = new StringBuffer();
+		String raport = null;
+		StringBuilder sb = null;
 		 String line = null;
 		  try {
 		    BufferedReader reader = request.getReader();
 		    while ((line = reader.readLine()) != null) {
 		    	System.out.println(line);
-		    	jb.append(line); //wpisanie przychodz¹cej linii do bufora
-		    	parser.par(line); //wywo³anie funkcji parsuj¹cej przychodz¹ce dane
+		    	raport = parser.parraport(line);
 		    }
 		  } catch (Exception e) { /*report an error*/ }
+		  if (raport != null) {
+			  raport = raport.substring(4);
+			  raport = "[" + raport + "]";
+			  sb = new StringBuilder(raport);
+			  sb.deleteCharAt(raport.lastIndexOf(","));
+		  }
 		  PrintWriter output = response.getWriter();
-			output.println(" [0] NEW TEST:");
+			output.println(sb);
 		output.flush();
 	}
+
 }
