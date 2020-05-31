@@ -54,7 +54,7 @@ margin-top:50px;
 <center><div id="titlefont">Strona lekarza - dzienniczek zdrowia seniora</div><div style="position:relative; padding-top:30px;"><img src="logo.png"></div></center>
 <form style="margin: 70px;" name="loginForm" method="post" action="lekarz-domowa.jsp">
    <p style="color:white"> LOGIN: <input type="text" name="username"/> </p><br/> 
-   <p style="color:white"> HASŁO: <input type="password" name="password"/> </p><br/>
+   <p style="color:white"> HASLO: <input type="password" name="password"/> </p><br/>
     <input class="button" type="submit" value="Login" />
 </form>
 </body>

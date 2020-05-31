@@ -21,9 +21,11 @@ Connection connection = null;
 Statement statement = null;
 Statement statementsenior = null;
 Statement state_feeling = null;
+Statement state_login = null;
 ResultSet resultSet = null;
 ResultSet resultSetsenior = null;
 ResultSet result_feeling = null;
+ResultSet r_login = null;
 %>
 <!DOCTYPE html>
 <html>
@@ -136,13 +138,34 @@ color: green;
   border-radius: 3px;
   padding: 5px 1em;
 }
+.result_box {
+width: 20%;
+height: 100;
+background-color:#c0c0c0;
+background-position: top center;
+float:left;
+}
+.style_font {
+font-family: "Arial Black", Gadget, sans-serif;
+font-size: 29px;
+letter-spacing: 0.4px;
+word-spacing: 2px;
+color: #000000;
+font-weight: normal;
+text-decoration: none;
+font-style: italic;
+font-variant: normal;
+text-transform: none;
+}
 </style>
 <head>
 <meta charset="ISO-8859-1">
-<title>Insert title here</title>
+<title>Dziennik seniora</title>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src=https://code.jquery.com/jquery-1.12.4.js></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 </head>
 <body>
-<script src="calendar.js"></script>
 
 <%
    String query = "SELECT * from user WHERE Typ='lekarz'";
@@ -163,8 +186,8 @@ color: green;
 		    	System.out.println("Zalogowano");
 		    	%>
 		    	<center><div id="titlefont">Dzienniczek zdrowia seniora</div></center>
-		    	<div style="margin-top:70px">Wybierz pacjenta: </div>
-		    	<form style="margin: 70px;" name=senior" method="post" action="wyniki-seniora.jsp">
+		    	<div style="margin-top:70px" id="titlefont">Wybierz pacjenta: </div>
+		    	<form style="margin: 70px" name="senior" method="post" action="wyniki-seniora.jsp">
 		    	<select name="login">
 		    	<%
 		    	while(resultSetsenior.next()){
@@ -173,11 +196,13 @@ color: green;
 		    	<%=resultSetsenior.getString("Login")%>
 		    	</option>
 		    	 <%
-		    	// do zrobienia: wysłanie informacji zwrotnej do użytkownika
 		    	}
 		    	%></select>
-		    	<input type="date" name="date">
+		    	<input type="text" id="datepicker" name="date">
 		    	<input type="submit" value="zatwierdz">
+		    	</form>
+		    	<div style="margin-top:70px" id="titlefont"> Samopoczucie pacjentow: </div>
+		    	<div>
 		    	<%
 		    	break;
 		    }
@@ -189,23 +214,53 @@ color: green;
  } catch (Exception e) {
  e.printStackTrace();
  }
-String feeling = "Select samopoczucie from wyniki";
+String tod = "2020-05-17";
+String feeling = "Select samopoczucie, user_klucz, data_pom from wyniki where data_pom Like '%" + tod + "%'";
 connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\kinga\\git\\repository\\telematyka-serwer\\telematyka.db");
 state_feeling=connection.createStatement();
+state_login=connection.createStatement();
 result_feeling = state_feeling.executeQuery(feeling);
+int i = 0;
 try {
 		do
 		  {
-			%> <div>
-		    <%=result_feeling.getString("samopoczucie") %> </div>
-		    <%
-		  } while (resultSet.next());
-connection.close();
-} catch (Exception e) {
-e.printStackTrace();
-}
+			%><div class="result_box" style="margin:5%" id="res" onclick="javascript:test();"><p class="style_font" >
+		    <%=result_feeling.getString("samopoczucie") %> </p> 
+		    <% r_login = state_login.executeQuery("Select Login from user where PK Like '" + result_feeling.getString("user_klucz") + "'"); %>
+		    <p style="text-align:right"> <%=r_login.getString("Login") %>
+		    </p><p><%=result_feeling.getString("data_pom") %></p></div><% } while (result_feeling.next());
+		connection.close();
+		} catch (Exception e) {
+		e.printStackTrace();
+	}
 %>
+</div>
+<div id="wiadomosc" style="visibility:hidden; clear:both;">
+<form method="post" id="mess" action="wysylanie.jsp">
+Wiadomosc:
+<select name="login">
+		    	<%
+		    	seniors = "Select Login from user Where Typ='senior'";
+		    	connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\kinga\\git\\repository\\telematyka-serwer\\telematyka.db");
+		    	statementsenior=connection.createStatement();
+		    	resultSetsenior = statementsenior.executeQuery(seniors);
+		    	while(resultSetsenior.next()){
+		    	%>
+		    	<option>
+		    	<%=resultSetsenior.getString("Login")%>
+		    	</option>
+		    	 <%
+		    	}
+		    	%></select>
+		    	<input type="submit" value="wyslij">
+</form>
+<textarea rows="10" cols="200" form="mess"></textarea>
+</div>
 </body>
 <script>
+test = function() {
+	console.log("java Script");
+	this.document.getElementById('wiadomosc').style.visibility='visible';
+}
 </script>
 </html>
