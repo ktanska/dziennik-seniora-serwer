@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-    <%@page import="java.sql.ResultSet"%>
+    <%@page import="java.sql.*"%>
 <%@page import="java.sql.Statement"%>
 <%@page import="java.sql.Connection"%>
 <%@page import="java.sql.DriverManager"%>
@@ -22,10 +22,41 @@ Statement statement = null;
 Statement statementsenior = null;
 Statement state_feeling = null;
 Statement state_login = null;
+Statement statement_wiad = null;
+ResultSet resultSet_wiad = null;
 ResultSet resultSet = null;
 ResultSet resultSetsenior = null;
 ResultSet result_feeling = null;
 ResultSet r_login = null;
+String login_lekarza=request.getParameter("username");
+String haslo_lekarza=request.getParameter("password");
+String nazwa_seniora=request.getParameter("nazwa_seniora");
+String tresc_wiadomosci=request.getParameter("tresc");
+if (nazwa_seniora != null && tresc_wiadomosci != null) {
+	System.out.println("nazwa " + nazwa_seniora + " tresc: " + tresc_wiadomosci);
+	String query = "SELECT tresc FROM wiadomosc WHERE user_klucz LIKE '"+nazwa_seniora+"'";
+	connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\kinga\\git\\repository\\telematyka-serwer\\telematyka.db");
+	statement_wiad=connection.createStatement();
+	resultSet_wiad = statement_wiad.executeQuery(query);
+	if(resultSet_wiad.isClosed()){
+		String query_wiad = "INSERT INTO wiadomosc(tresc, user_klucz) VALUES (?,?)";
+		PreparedStatement pstmt = connection.prepareStatement(query_wiad);
+		pstmt.setString(1, tresc_wiadomosci);
+		pstmt.setString(2, nazwa_seniora);
+		pstmt.executeUpdate();
+		connection.close();
+	}
+	else {
+		PreparedStatement ps = null;
+		String sql="Update wiadomosc set tresc=? where user_klucz="+nazwa_seniora;
+		ps = connection.prepareStatement(sql);
+		ps.setString(1,tresc_wiadomosci);
+		ps.executeUpdate();
+		nazwa_seniora = null;
+		tresc_wiadomosci = null;
+		connection.close();
+	}
+}
 %>
 <!DOCTYPE html>
 <html>
@@ -175,15 +206,6 @@ text-transform: none;
    statementsenior=connection.createStatement();
    resultSet = statement.executeQuery(query);
    resultSetsenior = statementsenior.executeQuery(seniors);
-     try {
-		do
-		  {
-		    String login = resultSet.getString("Login");
-		    String haslo = resultSet.getString("Haslo");
-		    System.out.println(login);
-		    System.out.println(haslo);
-		    if (login.equals(request.getParameter("username")) && haslo.equals(request.getParameter("password"))) {
-		    	System.out.println("Zalogowano");
 		    	%>
 		    	<center><div id="titlefont">Dzienniczek zdrowia seniora</div></center>
 		    	<div style="margin-top:70px" id="titlefont">Wybierz pacjenta: </div>
@@ -204,16 +226,8 @@ text-transform: none;
 		    	<div style="margin-top:70px" id="titlefont"> Samopoczucie pacjentow: </div>
 		    	<div>
 		    	<%
-		    	break;
-		    }
-		    else {
-		    	System.out.println("Brak użytkownika w bazie");
-		    }
-		  } while (resultSet.next());
  connection.close();
- } catch (Exception e) {
- e.printStackTrace();
- }
+
 String tod = "2020-05-17";
 String feeling = "Select samopoczucie, user_klucz, data_pom from wyniki where data_pom Like '%" + tod + "%'";
 connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\kinga\\git\\repository\\telematyka-serwer\\telematyka.db");
@@ -236,31 +250,50 @@ try {
 %>
 </div>
 <div id="wiadomosc" style="visibility:hidden; clear:both;">
-<form method="post" id="mess" action="wysylanie.jsp">
+<form method="post" name="mess">
 Wiadomosc:
-<select name="login">
+<select name="nazwa_seniora" id="login">
 		    	<%
-		    	seniors = "Select Login from user Where Typ='senior'";
+		    	seniors = "Select Login, PK from user Where Typ='senior'";
 		    	connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\kinga\\git\\repository\\telematyka-serwer\\telematyka.db");
 		    	statementsenior=connection.createStatement();
 		    	resultSetsenior = statementsenior.executeQuery(seniors);
 		    	while(resultSetsenior.next()){
 		    	%>
-		    	<option>
+		    	<option value="<%=resultSetsenior.getString("PK") %>">
 		    	<%=resultSetsenior.getString("Login")%>
 		    	</option>
 		    	 <%
 		    	}
 		    	%></select>
-		    	<input type="submit" value="wyslij">
+		    	<input type="text" name="tresc" required/>
+		    	<input type="submit" value="wyslij" id="mes">
 </form>
-<textarea rows="10" cols="200" form="mess"></textarea>
 </div>
 </body>
+<script type="text/javascript" 
+                src= 
+"https://ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js"> 
+      </script> 
 <script>
 test = function() {
-	console.log("java Script");
 	this.document.getElementById('wiadomosc').style.visibility='visible';
 }
 </script>
+<script>
+    $(document).ready(function() { 
+        $("#mes").click(function() { 
+            var fn = $("#tresc").val();
+            var userid = $('#nazwa_seniora').val();
+            $.post("lekarz-domowa.jsp", { 
+                tresc: fn,
+                nazwa_seniora: userid
+            }, function(data) { 
+                $("#msg").html(data); 
+            }); 
+
+        }); 
+    });
+</script>
+
 </html>

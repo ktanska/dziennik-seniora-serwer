@@ -37,4 +37,10 @@ public class parser {
 		String raport = db.getRaports(line);
 		return raport;
 	}
+	public static String wiadomosc(String line) throws SQLException {
+		// TODO Auto-generated method stub
+		db_connector db = new db_connector();
+		String raport = db.getMessage(line);
+		return raport;
+	}
 }

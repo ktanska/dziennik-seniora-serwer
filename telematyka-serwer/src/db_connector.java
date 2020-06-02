@@ -2,7 +2,6 @@ import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -124,9 +123,7 @@ public class db_connector {
 		String query = "select * from wyniki WHERE data_pom Like '%" + date + "%' AND user_klucz Like '" + PK + "'";
 
 	    ResultSet rs = st.executeQuery(query);
-	    List<Map<String, Object>> rows = new ArrayList<>();
 	    ResultSetMetaData rsmd = rs.getMetaData();
-	    int columnCount = rsmd.getColumnCount();
 	    try {
 	    	while (rs.next()) {
 	    		JSONObject JS = new JSONObject();
@@ -186,5 +183,29 @@ public class db_connector {
 		pstmt_dane.executeUpdate();
 	    conn2.close();
 		return true;
+	}
+	public String getMessage(String line) throws SQLException {
+		// TODO Auto-generated method stub
+		final JSONObject obj =  new JSONObject(line.substring(9));
+		System.out.println("sql"+line);
+		String login = (String)obj.get("login");
+		String raport = null;
+		
+		String sql = "SELECT PK FROM user WHERE Login LIKE '"+login+"'";
+		
+		Connection conn = conn();
+		Statement st = conn.createStatement();
+
+	    ResultSet rs1 = st.executeQuery(sql);
+	    String PK = rs1.getString("PK");
+	    System.out.println("PK"+ PK);
+	    
+		String query = "select * from wiadomosc WHERE user_klucz Like '" + PK + "'";
+
+	    ResultSet rs = st.executeQuery(query);
+	    ResultSetMetaData rsmd = rs.getMetaData();
+	    raport = rs.getString("tresc");
+	  //  raport = rows.toString();
+	    return raport;
 	}
 }
