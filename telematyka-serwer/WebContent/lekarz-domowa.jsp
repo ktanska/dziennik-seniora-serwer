@@ -228,21 +228,21 @@ text-transform: none;
 		    	<%
  connection.close();
 
-String tod = "2020-05-17";
-String feeling = "Select samopoczucie, user_klucz, data_pom from wyniki where data_pom Like '%" + tod + "%'";
+String tod = "2020-06-03";
+String feeling = "Select tresc, user_klucz, data from samopoczucie where data Like '%" + tod + "%'";
 connection = DriverManager.getConnection("jdbc:sqlite:C:\\Users\\kinga\\git\\repository\\telematyka-serwer\\telematyka.db");
 state_feeling=connection.createStatement();
 state_login=connection.createStatement();
 result_feeling = state_feeling.executeQuery(feeling);
 int i = 0;
 try {
-		do
+	while (result_feeling.next())
 		  {
 			%><div class="result_box" style="margin:5%" id="res" onclick="javascript:test();"><p class="style_font" >
-		    <%=result_feeling.getString("samopoczucie") %> </p> 
+		    <%=result_feeling.getString("tresc") %> </p> 
 		    <% r_login = state_login.executeQuery("Select Login from user where PK Like '" + result_feeling.getString("user_klucz") + "'"); %>
 		    <p style="text-align:right"> <%=r_login.getString("Login") %>
-		    </p><p><%=result_feeling.getString("data_pom") %></p></div><% } while (result_feeling.next());
+		    </p><p><%=result_feeling.getString("data") %></p></div><% } ;
 		connection.close();
 		} catch (Exception e) {
 		e.printStackTrace();

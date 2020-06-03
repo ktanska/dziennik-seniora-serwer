@@ -187,8 +187,14 @@ public class db_connector {
 	public String getMessage(String line) throws SQLException {
 		// TODO Auto-generated method stub
 		final JSONObject obj =  new JSONObject(line.substring(9));
+		String samopoczucie = null;
+		String kiedy = null;
 		System.out.println("sql"+line);
 		String login = (String)obj.get("login");
+		if(obj.has("tresc")) {
+			samopoczucie = (String)obj.get("tresc");
+			kiedy = (String)obj.get("date");
+		}
 		String raport = null;
 		
 		String sql = "SELECT PK FROM user WHERE Login LIKE '"+login+"'";
@@ -203,9 +209,28 @@ public class db_connector {
 		String query = "select * from wiadomosc WHERE user_klucz Like '" + PK + "'";
 
 	    ResultSet rs = st.executeQuery(query);
-	    ResultSetMetaData rsmd = rs.getMetaData();
 	    raport = rs.getString("tresc");
-	  //  raport = rows.toString();
+		if (samopoczucie != null) {
+	    	String query_test = "SELECT tresc, data FROM samopoczucie WHERE user_klucz LIKE '"+PK+"'";
+	    	Statement statementwiad=conn.createStatement();
+	    	ResultSet resultSetwiad = statementwiad.executeQuery(query_test);
+	    	if(resultSetwiad.getString("tresc") == null){
+	    		String query_wiad = "INSERT INTO samopoczucie(tresc, user_klucz, data) VALUES (?,?,?)";
+	    		PreparedStatement pstmt_samop = conn.prepareStatement(query_wiad);
+	    		pstmt_samop.setString(1, samopoczucie);
+	    		pstmt_samop.setString(2, PK);
+	    		pstmt_samop.setString(3, kiedy);
+	    		pstmt_samop.executeUpdate();
+	    	}
+	    	else {
+	    		String sql_wiad="Update samopoczucie set tresc=?, data=? where user_klucz="+PK;
+	    		PreparedStatement ps_wiad = conn.prepareStatement(sql_wiad);
+	    		ps_wiad.setString(1,samopoczucie);
+	    		ps_wiad.setString(2, kiedy);
+	    		ps_wiad.executeUpdate();
+	    	}
+	    }
+	    conn.close();
 	    return raport;
 	}
 }
